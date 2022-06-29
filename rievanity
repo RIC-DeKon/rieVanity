@@ -1,0 +1,41 @@
+#!/bin/sh
+
+generator(){
+GEN=$(vanitygen -p ric1q$VANITY)
+GENOK=$(echo "${GEN##*]}")
+zenity --info --window-icon /usr/share/applications/rievanity.png --icon-name=keys --title "Generated Address" --text "$GENOK" | zenity --notification --window-icon /usr/share/applications/rievanity.png --text "Riecoin Vanity Generator:\n <b>Generated Address</b>" 
+}
+
+kill_process(){
+process=$(pgrep vanitygen)
+[[ ! $process ]] || kill $process
+}
+
+while VANITY=$(zenity --forms --title "Riecoin Vanity Generator" \
+	--text " <big><b>Get your personalised attractive Riecoin address:</b></big> 
+	    
+	Generation time depend of your CPU power.
+	 
+	<b>- Only Allowed:</b>
+	      acdefghjklmlnpqrstuvwsyz023456789
+	   
+	<b>- Put patterns without 'ric1q'</b>
+
+         Result will be automatically showed
+	   
+    <small><i><b>© rieVanity from <a href='https://github.com/RIC-DeKon/'>DeKon</a></b></i> based on  © VanityGen from <i><b><a href='https://github.com/MakisChristou/'>MakisChristou</a></b></i></small>" \
+	--add-entry "Patterns:" ); do
+
+case $? in
+    0)
+	generator | zenity --window-icon /usr/share/applications/rievanity.png --title "Generating RIC Address" --width=250 --progress * --pulsate --no-cancel --auto-close
+        ;;
+    1)
+        kill_process && break
+	;;
+    -1)
+        zenity --warning --text "Unexpected error, please report this issue on github."
+	;;
+esac
+
+done
